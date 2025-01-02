@@ -11,8 +11,6 @@ DROP TABLE IF EXISTS
     accounts,
     records;
 
-SAVEPOINT before_create_tables;
-
 -- Создание таблиц
 
 -- Таблица CLIENTS
@@ -72,89 +70,103 @@ CREATE TABLE records (
     oper_date DATE
 );
 
-EXCEPTION WHEN OTHERS THEN
-    ROLLBACK TO SAVEPOINT before_create_tables;
-    RAISE NOTICE 'Произошла ошибка при создании таблиц';
-
-
-SAVEPOINT before_insert_values;
-
--- 2. Заполнение таблиц данными
-
--- Вставка данных
-INSERT INTO tarifs VALUES
-(1, 'Тариф за выдачу кредита', 10),
-(2, 'Тариф за открытие счета', 10),
-(3, 'Тариф за обслуживание карты', 10),
-(4, 'Тариф за переводы', 5),
-(5, 'Тариф за снятие наличных', 7),
-(6, 'Тариф за пополнение счета', 3),
-(7, 'Тариф за ведение счета', 15),
-(8, 'Тариф за годовое обслуживание карты', 20),
-(9, 'Тариф за перевыпуск карты', 25),
-(10, 'Тариф за валютные операции', 12),
-(11, 'Тариф за срочные вклады', 8),
-(12, 'Тариф за рассрочку', 6),
-(13, 'Тариф за микрокредиты', 4),
-(14, 'Тариф за обслуживание депозита', 5),
-(15, 'Тариф за закрытие счета', 10);
-
-INSERT INTO product_type VALUES
-(1, 'КРЕДИТ', to_date('01.01.2018','DD.MM.YYYY'), null, 1),
-(2, 'ДЕПОЗИТ', to_date('01.01.2018','DD.MM.YYYY'), null, 2),
-(3, 'КАРТА', to_date('01.01.2018','DD.MM.YYYY'), null, 3),
-(4, 'РАССРОЧКА', to_date('01.01.2018','DD.MM.YYYY'), null, 1),
-(5, 'ВКЛАД', to_date('01.01.2018','DD.MM.YYYY'), null, 2),
-(6, 'МИКРОКРЕДИТ', to_date('01.01.2018','DD.MM.YYYY'), null, 1);
-
-INSERT INTO clients VALUES
-(1, 'Сидоров Иван Петрович', 'Россия, Московская область, г. Пушкин', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская область, г. Пушкин, ул. Грибоедова, д. 5', '2222 555555, выдан ОВД г. Пушкин, 10.01.2015'),
-(2, 'Иванов Петр Сидорович', 'Россия, Московская область, г. Клин', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская область, г. Клин, ул. Мясникова, д. 3', '4444 666666, выдан ОВД г. Клин, 10.01.2015'),
-(3, 'Петров Сиодр Иванович', 'Россия, Московская область, г. Балашиха', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская область, г. Балашиха, ул. Пушкина, д. 7', '4444 666666, выдан ОВД г. Клин, 10.01.2015'),
-(4, 'Смирнов Алексей Иванович', 'Россия, г. Москва', to_date('01.01.1999','DD.MM.YYYY'), 'Россия, г. Москва, ул. Ленина, д. 12', '3333 111111, выдан ОВД г. Москва, 15.01.2010'),
-(5, 'Кузнецов Николай Сергеевич', 'Россия, г. Санкт-Петербург', to_date('01.01.1987','DD.MM.YYYY'), 'Россия, г. Санкт-Петербург, ул. Маяковского, д. 9', '5555 777777, выдан ОВД г. Санкт-Петербург, 20.01.2005'),
-(6, 'Васильева Анна Олеговна', 'Россия, г. Екатеринбург', to_date('01.01.1990','DD.MM.YYYY'), 'Россия, г. Екатеринбург, ул. Победы, д. 15', '6666 888888, выдан ОВД г. Екатеринбург, 25.01.2008');
-
-INSERT INTO products VALUES
-(1, 1, 'Кредитный договор с Сидоровым И.П.', 1, to_date('01.06.2015','DD.MM.YYYY'), null),
-(2, 2, 'Депозитный договор с Ивановым П.С.', 2, to_date('01.08.2017','DD.MM.YYYY'), null),
-(3, 3, 'Карточный договор с Петровым С.И.', 3, to_date('01.08.2017','DD.MM.YYYY'), null),
-(4, 4, 'Рассрочка с Васильевой А.О.', 6, to_date('01.03.2020','DD.MM.YYYY'), null),
-(5, 5, 'Вклад с Кузнецовым Н.С.', 2, to_date('01.05.2019','DD.MM.YYYY'), null);
-
-INSERT INTO accounts VALUES
-(1, 'Кредитный счет для Сидоровым И.П.', -2000, 1, to_date('01.06.2015','DD.MM.YYYY'), null, 1, '45502810401020000022'),
-(2, 'Депозитный счет для Ивановым П.С.', 6000, 2, to_date('01.08.2017','DD.MM.YYYY'), null, 2, '42301810400000000001'),
-(3, 'Карточный счет для Петровым С.И.', 8000, 3, to_date('01.08.2017','DD.MM.YYYY'), null, 3, '40817810700000000001'),
-(4, 'Рассрочный счет для Васильевой А.О.', -10000, 4, to_date('01.03.2020','DD.MM.YYYY'), null, 4, '45502810401030000033'),
-(5, 'Вкладной счет для Кузнецова Н.С.', 15000, 5, to_date('01.05.2019','DD.MM.YYYY'), null, 5, '42301810400020000044');
-
-INSERT INTO records VALUES
-(1, 1, 5000, 1, to_date('01.06.2015','DD.MM.YYYY')),
-(2, 0, 1000, 1, to_date('01.07.2015','DD.MM.YYYY')),
-(3, 0, 2000, 1, to_date('01.08.2015','DD.MM.YYYY')),
-(4, 1, 5000, 1, to_date('01.09.2015','DD.MM.YYYY')),
-(5, 1, 3000, 1, to_date('01.10.2015','DD.MM.YYYY')),
-(6, 0, 10000, 2, to_date('01.08.2017','DD.MM.YYYY')),
-(7, 1, 1000, 2, to_date('05.08.2017','DD.MM.YYYY')),
-(8, 0, 500, 4, to_date('15.03.2020','DD.MM.YYYY')),
-(9, 1, 7000, 5, to_date('21.05.2019','DD.MM.YYYY'));
-
-EXCEPTION WHEN OTHERS THEN
-    ROLLBACK TO SAVEPOINT before_insert_values;
-    RAISE NOTICE 'Произошла ошибка при наполнении таблиц';
-    
 COMMIT;
 
 END;
 
+-- 2. Заполнение таблиц данными
+
+begin;
+
+insert into tarifs values (1,'Тариф за выдачу кредита', 10);
+insert into tarifs values (2,'Тариф за открытие счета', 10);
+insert into tarifs values (3,'Тариф за обслуживание карты', 10);
+
+insert into product_type values (1, 'КРЕДИТ', to_date('01.01.2018','DD.MM.YYYY'), null, 1);
+insert into product_type values (2, 'ДЕПОЗИТ', to_date('01.01.2018','DD.MM.YYYY'), null, 2);
+insert into product_type values (3, 'КАРТА', to_date('01.01.2018','DD.MM.YYYY'), null, 3);
+
+insert into clients values (1, 'Сидоров Иван Петрович', 'Россия, Московская облать, г. Пушкин', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская облать, г. Пушкин, ул. Грибоедова, д. 5', '2222 555555, выдан ОВД г. Пушкин, 10.01.2015');
+insert into clients values (2, 'Иванов Петр Сидорович', 'Россия, Московская облать, г. Клин', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская облать, г. Клин, ул. Мясникова, д. 3', '4444 666666, выдан ОВД г. Клин, 10.01.2015');
+insert into clients values (3, 'Петров Сиодр Иванович', 'Россия, Московская облать, г. Балашиха', to_date('01.01.2001','DD.MM.YYYY'), 'Россия, Московская облать, г. Балашиха, ул. Пушкина, д. 7', '4444 666666, выдан ОВД г. Клин, 10.01.2015');
+
+insert into products values (1, 1, 'Кредитный договор с Сидоровым И.П.', 1, to_date('01.06.2015','DD.MM.YYYY'), null);
+insert into products values (2, 2, 'Депозитный договор с Ивановым П.С.', 2, to_date('01.08.2017','DD.MM.YYYY'), null);
+insert into products values (3, 3, 'Карточный договор с Петровым С.И.', 3, to_date('01.08.2017','DD.MM.YYYY'), null);
 
 
-EXCEPTION WHEN OTHERS THEN
-    ROLLBACK;
-    RAISE;
-END;
-$$;
+insert into accounts values (1, 'Кредитный счет для Сидоровым И.П.', -2000, 1, to_date('01.06.2015','DD.MM.YYYY'), null, 1, '45502810401020000022');
+insert into accounts values (2, 'Депозитный счет для Ивановым П.С.', 6000, 2, to_date('01.08.2017','DD.MM.YYYY'), null, 2, '42301810400000000001');
+insert into accounts values (3, 'Карточный счет для Петровым С.И.', 8000, 3, to_date('01.08.2017','DD.MM.YYYY'), null, 3, '40817810700000000001');
+
+insert into records values (1, 1, 5000, 1, to_date('01.06.2015','DD.MM.YYYY'));
+insert into records values (2, 0, 1000, 1, to_date('01.07.2015','DD.MM.YYYY'));
+insert into records values (3, 0, 2000, 1, to_date('01.08.2015','DD.MM.YYYY'));
+insert into records values (4, 0, 3000, 1, to_date('01.09.2015','DD.MM.YYYY'));
+insert into records values (5, 1, 5000, 1, to_date('01.10.2015','DD.MM.YYYY'));
+insert into records values (6, 0, 3000, 1, to_date('01.10.2015','DD.MM.YYYY'));
+insert into records values (7, 0, 10000, 2, to_date('01.08.2017','DD.MM.YYYY'));
+insert into records values (8, 1, 1000, 2, to_date('05.08.2017','DD.MM.YYYY'));
+insert into records values (9, 1, 2000, 2, to_date('21.09.2017','DD.MM.YYYY'));
+insert into records values (10, 1, 5000, 2, to_date('24.10.2017','DD.MM.YYYY'));
+insert into records values (11, 0, 6000, 2, to_date('26.11.2017','DD.MM.YYYY'));
+insert into records values (12, 0, 120000, 3, to_date('08.09.2017','DD.MM.YYYY'));
+insert into records values (13, 1, 1000, 3, to_date('05.10.2017','DD.MM.YYYY'));
+insert into records values (14, 1, 2000, 3, to_date('21.10.2017','DD.MM.YYYY'));
+insert into records values (15, 1, 5000, 3, to_date('24.10.2017','DD.MM.YYYY'));
+
+commit;
+
+end;
+
+-- 3. Добавление данных
+
+DO $$
+BEGIN
+  -- Начало транзакции
+  BEGIN
+
+    -- Записи сделанные в 2024
+    INSERT INTO records
+    VALUES
+      (16, 1, 5000, 1, to_date('01.06.2015', 'DD.MM.YYYY')),
+      (17, 0, 1000, 1, to_date('01.07.2015', 'DD.MM.YYYY')),
+      (18, 1, 2000, 1, to_date('01.08.2015', 'DD.MM.YYYY')),
+      (19, 1, 3000, 1, to_date('01.09.2015', 'DD.MM.YYYY')),
+      (20, 0, 5000, 1, to_date('01.10.2015', 'DD.MM.YYYY')),
+      (21, 1, 3000, 1, to_date('01.10.2015', 'DD.MM.YYYY')),
+      (22, 1, 10000, 2, to_date('01.08.2017', 'DD.MM.YYYY')),
+      (23, 1, 1000, 2, to_date('05.08.2017', 'DD.MM.YYYY')),
+      (24, 1, 2000, 2, to_date('21.09.2017', 'DD.MM.YYYY')),
+      (25, 1, 5000, 2, to_date('24.10.2017', 'DD.MM.YYYY')),
+      (26, 0, 6000, 2, to_date('26.11.2017', 'DD.MM.YYYY')),
+      (27, 1, 120000, 3, to_date('08.09.2017', 'DD.MM.YYYY')),
+      (28, 1, 1000, 3, to_date('05.10.2017', 'DD.MM.YYYY')),
+      (29, 1, 2000, 3, to_date('21.10.2017', 'DD.MM.YYYY')),
+      (30, 1, 5000, 3, to_date('24.10.2017', 'DD.MM.YYYY')),
+      (31, 1, 1000, 3, to_date('01.01.2024', 'DD.MM.YYYY')),
+      (32, 0, 15000, 1, to_date('01.01.2024', 'DD.MM.YYYY')),
+      (33, 1, 5000, 1, to_date('01.01.2024', 'DD.MM.YYYY')),
+      (34, 1, 5000, 2, to_date('01.01.2024', 'DD.MM.YYYY')),
+      (35, 1, 3000, 2, to_date('01.01.2024', 'DD.MM.YYYY')),
+      (36, 1, 5000, 1, to_date('15.10.2024', 'DD.MM.YYYY')),
+      (37, 0, 10000, 1, to_date('20.11.2024', 'DD.MM.YYYY')),
+      (38, 0, 1000, 1, to_date('05.12.2024', 'DD.MM.YYYY')),
+      (39, 1, 2000, 1, to_date('10.12.2024', 'DD.MM.YYYY')),
+      (40, 1, 3000, 2, to_date('15.12.2024', 'DD.MM.YYYY')),
+      (41, 0, 4000, 2, to_date('20.12.2024', 'DD.MM.YYYY'));
+
+  EXCEPTION
+    -- Обработка ошибки
+    WHEN OTHERS THEN
+      -- Откатываем изменения в случае ошибки
+      ROLLBACK;
+      RAISE EXCEPTION 'Ошибка: %', SQLERRM;
+  END;
+
+  -- Фиксируем изменения
+  COMMIT;
+END $$;
 
 -- Запрос 4: Отчет по счетам типа ДЕПОЗИТ, принадлежащим клиентам без открытых продуктов типа КРЕДИТ
 SELECT a.*
@@ -172,12 +184,12 @@ WHERE pt.name = 'ДЕПОЗИТ'
 -- Запрос 5: Средние движения по счетам за один день в разрезе типа продукта
 SELECT pt.name AS product_type,
        r.oper_date,
-       AVG(r.sum) AS average_sum
+       ROUND(AVG(r.sum), 2) AS average_sum
 FROM records r
 JOIN accounts a ON r.acc_ref = a.id
 JOIN products p ON a.product_ref = p.id
 JOIN product_type pt ON p.product_type_id = pt.id
-WHERE r.oper_date = '2023-01-01'  -- Пример произвольного дня
+WHERE r.oper_date = '2015-06-01'
 GROUP BY pt.name, r.oper_date;
 
 -- Запрос 6: Клиенты с операциями по счетам за последний месяц
@@ -235,6 +247,20 @@ WHERE pt.name = 'КРЕДИТ'
   );
 
 -- Запрос 9: Закрытие продуктов типа КРЕДИТ с полным погашением и без повторной выдачи
+-- Просмотр значений
+SELECT p.id
+    FROM products p
+    JOIN product_type pt ON p.product_type_id = pt.id
+    JOIN accounts a ON p.id = a.product_ref
+    LEFT JOIN records r ON a.id = r.acc_ref
+    WHERE pt.name = 'КРЕДИТ'
+      AND p.close_date IS NULL
+      AND NOT EXISTS (
+        SELECT 1
+        FROM records r_sub
+        WHERE r_sub.acc_ref = a.id AND r_sub.dt = 1
+      );
+
 UPDATE products
 SET close_date = CURRENT_DATE
 WHERE id IN (
@@ -282,3 +308,5 @@ FROM (
 ) AS subquery
 WHERE products.id = subquery.product_id
   AND (subquery.max_debit > 0 OR subquery.max_credit > 0);
+
+SELECT * FROM products;
