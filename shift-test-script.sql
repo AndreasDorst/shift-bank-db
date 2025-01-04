@@ -126,35 +126,28 @@ BEGIN
   -- Начало транзакции
   BEGIN
 
-    -- Записи сделанные в 2024
-    INSERT INTO records
-    VALUES
-      (16, 1, 5000, 1, to_date('01.06.2015', 'DD.MM.YYYY')),
-      (17, 0, 1000, 1, to_date('01.07.2015', 'DD.MM.YYYY')),
-      (18, 1, 2000, 1, to_date('01.08.2015', 'DD.MM.YYYY')),
-      (19, 1, 3000, 1, to_date('01.09.2015', 'DD.MM.YYYY')),
-      (20, 0, 5000, 1, to_date('01.10.2015', 'DD.MM.YYYY')),
-      (21, 1, 3000, 1, to_date('01.10.2015', 'DD.MM.YYYY')),
-      (22, 1, 10000, 2, to_date('01.08.2017', 'DD.MM.YYYY')),
-      (23, 1, 1000, 2, to_date('05.08.2017', 'DD.MM.YYYY')),
-      (24, 1, 2000, 2, to_date('21.09.2017', 'DD.MM.YYYY')),
-      (25, 1, 5000, 2, to_date('24.10.2017', 'DD.MM.YYYY')),
-      (26, 0, 6000, 2, to_date('26.11.2017', 'DD.MM.YYYY')),
-      (27, 1, 120000, 3, to_date('08.09.2017', 'DD.MM.YYYY')),
-      (28, 1, 1000, 3, to_date('05.10.2017', 'DD.MM.YYYY')),
-      (29, 1, 2000, 3, to_date('21.10.2017', 'DD.MM.YYYY')),
-      (30, 1, 5000, 3, to_date('24.10.2017', 'DD.MM.YYYY')),
-      (31, 1, 1000, 3, to_date('01.01.2024', 'DD.MM.YYYY')),
-      (32, 0, 15000, 1, to_date('01.01.2024', 'DD.MM.YYYY')),
-      (33, 1, 5000, 1, to_date('01.01.2024', 'DD.MM.YYYY')),
-      (34, 1, 5000, 2, to_date('01.01.2024', 'DD.MM.YYYY')),
-      (35, 1, 3000, 2, to_date('01.01.2024', 'DD.MM.YYYY')),
-      (36, 1, 5000, 1, to_date('15.10.2024', 'DD.MM.YYYY')),
-      (37, 0, 10000, 1, to_date('20.11.2024', 'DD.MM.YYYY')),
-      (38, 0, 1000, 1, to_date('05.12.2024', 'DD.MM.YYYY')),
-      (39, 1, 2000, 1, to_date('10.12.2024', 'DD.MM.YYYY')),
-      (40, 1, 3000, 2, to_date('15.12.2024', 'DD.MM.YYYY')),
-      (41, 0, 4000, 2, to_date('20.12.2024', 'DD.MM.YYYY'));
+  -- Погашение существующего кредитного договора
+  insert into records values (16, 0, 2000, 1, to_date('01.12.2024', 'DD.MM.YYYY')); -- Погашение оставшегося долга
+  update accounts
+  set saldo = saldo + 2000
+  where id = 1;
+
+  -- Закрытие текущего кредитного договора
+  update products
+  set close_date = to_date('21.12.2024', 'DD.MM.YYYY')
+  where id = 1;
+
+  -- Создание нового кредитного договора
+  insert into products values (4, 1, 'Кредитный договор с Сидоровым И.П.', 1, to_date('21.12.2024', 'DD.MM.YYYY'), null);
+
+  -- Создание нового кредитного счета
+  insert into accounts values (4, 'Кредитный счет для Сидоровым И.П.', 0, 1, to_date('21.12.2024', 'DD.MM.YYYY'), null, 4, '45502810401020000024');
+
+  -- Выдача кредита по новому договору
+  insert into records values (17, 1, 10000, 4, to_date('21.12.2024', 'DD.MM.YYYY'));
+  update accounts
+  set saldo = saldo - 10000
+  where id = 4;
 
   EXCEPTION
     -- Обработка ошибки
@@ -167,6 +160,9 @@ BEGIN
   -- Фиксируем изменения
   COMMIT;
 END $$;
+
+-- Проверка
+select * from accounts;
 
 -- Запрос 4: Отчет по счетам типа ДЕПОЗИТ, принадлежащим клиентам без открытых продуктов типа КРЕДИТ
 SELECT a.*
@@ -247,20 +243,6 @@ WHERE pt.name = 'КРЕДИТ'
   );
 
 -- Запрос 9: Закрытие продуктов типа КРЕДИТ с полным погашением и без повторной выдачи
--- Просмотр значений
-SELECT p.id
-    FROM products p
-    JOIN product_type pt ON p.product_type_id = pt.id
-    JOIN accounts a ON p.id = a.product_ref
-    LEFT JOIN records r ON a.id = r.acc_ref
-    WHERE pt.name = 'КРЕДИТ'
-      AND p.close_date IS NULL
-      AND NOT EXISTS (
-        SELECT 1
-        FROM records r_sub
-        WHERE r_sub.acc_ref = a.id AND r_sub.dt = 1
-      );
-
 UPDATE products
 SET close_date = CURRENT_DATE
 WHERE id IN (
